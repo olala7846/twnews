@@ -16,11 +16,10 @@ IGNORE_CLASSES = {
   'recommended-article',
   'social-share',
 }
-SPACE_CHARS = {'\n', '\r', '\t', '\v',}
+SECTION_TAGS = {'title', 'header', 'figure'}
+SPACE_CHARS = {'\n', '\r', '\t', '\v', ' '}
 
-def no_newline(string, nospace=True):
-  if nospace:
-    string = string.replace(' ', '')
+def no_newline(string):
   for c in SPACE_CHARS:
     string = string.replace(c, '')
   return string
@@ -51,9 +50,12 @@ with open(FILE_PATH, 'r') as f:
 
     if node.text:
       html_text = html_text + no_newline(node.text)
-    for sub_node in node:
-      _traverse(sub_node)
-      if sub_node.tail:
-        html_text = html_text + no_newline(sub_node.tail)
+      for sub_node in node:
+        _traverse(sub_node)
+        if sub_node.tail:
+          html_text = html_text + no_newline(sub_node.tail)
+      if node.tag in SECTION_TAGS:
+        html_text += '|'
+
   _traverse(root)
   print(html_text)
