@@ -1,4 +1,6 @@
 # News Center Project
 
-Python 3
+We use Python 3 virtualenv
+
+to activate virtual environment run `source venv/bin/activate`
 
