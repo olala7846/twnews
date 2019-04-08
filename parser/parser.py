@@ -6,10 +6,12 @@
 from lxml import etree  # Element Tree
 
 # FILE_PATH = 'resource/chinatimes_sample.html'
-FILE_PATH = 'resource/udn.html'
+# FILE_PATH = 'resource/udn.html'
+FILE_PATH = 'resource/setn.html'
 IGNORE_TAGS = {
   'audio',
   'button',
+  'footer',
   'iframe',
   'meta',
   'nav',
@@ -34,6 +36,9 @@ IGNORE_CLASSES = {
   'social_bar',
   'social_more',
   'sitemap',
+  # 三立
+  'hidden-print',
+  'sbNewsList',
 }
 IGNORE_IDS = {
   # 聯合
