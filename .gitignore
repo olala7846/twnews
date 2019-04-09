@@ -3,3 +3,5 @@
 
 # Non source code resources
 /resource
+
+__pycache__
