@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 import scrapy
+import logging
 from scrapy.http import HtmlResponse
 from lxml import etree
 
@@ -14,10 +15,21 @@ IGNORE_TAGS = {
   'select',
   'style',
   'video',
+  'ul',
+  'li',
+  'table',
+  'tr',
+  'td'
 }
 
 MIN_P_TAGS = 3
+SPACE_CHARS = {'\n', '\r', '\t', '\v', ' '}
+PARAGRAPH_TAGS = {'title', 'header', 'h1', 'h2', 'h3', 'h4', 'h5', 'p', 'div'}
 
+def no_newline(string):
+  for c in SPACE_CHARS:
+    string = string.replace(c, '')
+  return string
 
 class ExampleSpider(scrapy.Spider):
     name = 'example'
@@ -26,20 +38,26 @@ class ExampleSpider(scrapy.Spider):
         'udn.com',
     ]
     start_urls = [
-        # 'https://www.chinatimes.com/politic/',
-        'https://udn.com',
+        # 'https://www.chinatimes.com/opinion/20190409003973-262105?chdtv='
+        'https://www.chinatimes.com/politic/',
+        # 'https://udn.com',
     ]
 
     def parse(self, response):
         if not isinstance(response, HtmlResponse):
-            print('response not html %s' % repsonse.url)
+            logging.warning('response not html %s' % repsonse.url)
+            return
 
         parser = etree.HTMLParser()
         root = etree.HTML(response.text, parser)
         if self.is_article(root):
-            print('%s is an article' % response.url)
+            content = self.scrape(root)
+            yield {
+              'content': content,
+              'url': response.url,
+            }
         else:
-            print('follow %s ' % response.url)
+            # not article, follow links
             for href in response.css('a::attr(href)'):
               yield response.follow(href.get())
 
@@ -64,4 +82,27 @@ class ExampleSpider(scrapy.Spider):
             return False
 
         return _has_article_node(root)
+
+    def scrape(self, root):
+        content = ''
+        def _traverse(node):
+            nonlocal content
+            # Skip html comments
+            if node.tag is etree.Comment:
+              return
+            if node.tag in IGNORE_TAGS:
+                return
+
+            if node.text:
+                content = content + no_newline(node.text)
+            for sub_node in node:
+                _traverse(sub_node)
+                if sub_node.tail:
+                    content = content + no_newline(sub_node.tail)
+            # End of paragraph, add a seperator
+            if node.tag in PARAGRAPH_TAGS:
+                content += '|'
+
+        _traverse(root)
+        return content
 

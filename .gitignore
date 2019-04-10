@@ -3,5 +3,8 @@
 
 # Non source code resources
 /resource
+# Do not track output files
+*.csv
 
 __pycache__
+.DS_Store
