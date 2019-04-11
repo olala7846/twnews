@@ -22,17 +22,25 @@ IGNORE_TAGS = {
   'td'
 }
 
+IGNORE_IDS = {
+  'comments'
+}
+
+IGNORE_CLASSES = {
+  'comments'
+}
+
 MIN_P_TAGS = 3
 SPACE_CHARS = {'\n', '\r', '\t', '\v', ' '}
-PARAGRAPH_TAGS = {'title', 'header', 'h1', 'h2', 'h3', 'h4', 'h5', 'p', 'div'}
+PARAGRAPH_TAGS = {'article', 'title', 'header', 'h1', 'h2', 'h3', 'h4', 'h5', 'p', 'div'}
 
 def no_newline(string):
   for c in SPACE_CHARS:
     string = string.replace(c, '')
   return string
 
-class ExampleSpider(scrapy.Spider):
-    name = 'example'
+class NewsSpider(scrapy.Spider):
+    name = 'news'
     allowed_domains = [
         'www.chinatimes.com',
         'udn.com',
@@ -87,10 +95,8 @@ class ExampleSpider(scrapy.Spider):
         content = ''
         def _traverse(node):
             nonlocal content
-            # Skip html comments
-            if node.tag is etree.Comment:
-              return
-            if node.tag in IGNORE_TAGS:
+
+            if self.should_skip(node):
                 return
 
             if node.text:
@@ -106,3 +112,21 @@ class ExampleSpider(scrapy.Spider):
         _traverse(root)
         return content
 
+    def should_skip(self, node):
+        if node.tag is etree.Comment:
+            return True
+
+        if node.tag in IGNORE_TAGS:
+            return True
+
+        if 'id' in node.attrib and node.attrib['id'] in IGNORE_IDS:
+          print('ignore id %s' % node.attrib['id'])
+          return True
+
+        if 'class' in node.attrib:
+            for class_name in node.attrib['class'].split():
+                if class_name in IGNORE_CLASSES:
+                    print('ignore class %s' % class_name)
+                    return True
+
+        return False

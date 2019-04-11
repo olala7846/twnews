@@ -1,37 +1,60 @@
 #-*- coding: utf-8 -*-
+import csv
 from nltk import ngrams
+from collections import Counter
 
-TEXT = """
-大陸女星劉詩詩與吳奇隆結婚4年，去年宣布「做人」成功，為維持劉詩詩的討論熱度，近來粉絲紛紛翻出劉詩詩作品回味，其中劉詩詩主演的古裝大戲《醉玲瓏》，搭檔陳偉霆分享說，有次拍強吻戲，卻不慎弄傷劉詩詩，陳偉霆說：「當時我比較用力推她，拍戲過程聽到『碰』一聲，看她沒有反應，就繼續演下去，後來才知道她的手撞到桌子，真的很不好意思。」他並大讚劉詩詩敬業，個性好相處。
-劉詩詩和吳奇隆今年5月將迎接「小霹靂虎」，今年3月生日兩人罕見放閃，劉詩詩還曬出禮物照和個人背影照，纖細身材讓網友直呼不可思議，看不出懷有7月身孕。粉絲最近常討論劉詩詩過去戲劇《醉玲瓏》，她在劇中飾演聖巫女，與男主角陳偉霆大談雙時空禁忌虐戀，兩人有不少吻戲，拍戲期間傳出吳奇隆三不五時探班「盯場」，讓陳偉霆壓力不小。
-繼《女醫明妃傳》後，劉詩詩睽違2年再接古裝劇《醉玲瓏》，是她懷孕前接演的最後一部古裝作品，她在劇中古裝扮相絕美，更嘗試帥氣的軍裝造型，親自上陣拍攝打戲。談到久違再接古裝劇，她笑稱之前以時裝劇為主，身形略為走樣，須演古裝劇調整一下，「覺得自己有點駝背，太自在了。」
-古裝劇台詞當然少不了大量文言文，由於陳偉霆說話帶有香港口音，劉詩詩透露，每天早上首次對詞時，陳偉霆一開始會說得不太順暢，常常逗笑眾人，但一正式開拍，立刻變了一個人，大段台詞也立刻記在腦中，讓她相當佩服。
-陳偉霆過去主演電視劇《老九門》爆紅，他在劇中飾演霸氣十足的西魏四皇子元凌，他笑說，為了緩和拍戲氣氛，偶爾會捉弄一下劉詩詩，因為劉詩詩是很好的捉弄對象，說完不忘向吳奇隆喊話：「對不起隆哥，我沒有什麼意思！」
-陳偉霆透露，吳奇隆來探班時，都會打招呼，待人親切沒有距離感，不過拍吻戲時，若吳奇隆在場，難免會有壓力，他笑稱：「有次隆哥來探班，拍吻戲前突然消失，知道他不在，大家也就放心去演。」
-劉詩詩笑言，拍戲期間吳奇隆確實有排出一些時間陪她，有次他來探班，拍戲前才知道有吻戲，「他（吳奇隆）發現以後，就說沒關係，妳好好拍，然後我到現場就找不到他。」原來吳奇隆是貼心「搞失蹤」，好讓老婆放心演出。想看更多劉詩詩、陳偉霆的精采對手戲，敬請鎖定中天綜合台3/27起週一至週五晚間8點《醉玲瓏》。
-"""
-STOP_WORDS = {
-  '《', '》','，','。','：','「', '」', '!', '。','\n', '，', '/', '、','（', '）', '！'}
+CSV_FILE = 'resource/chinatimes_20190409.csv'
+STOP_WORDS = {'。', '的', '，', '|'}
 
-def clean_text(string):
-  for c in STOP_WORDS:
-    string = string.replace(c, '')
-  return string
 
-text = clean_text(TEXT)
+def split_text(text):
+  l = 0
+  for r in range(len(text)):
+    if text[r] in STOP_WORDS:
+      yield text[l:r]
+      l = r + 1
+  yield text[l:]
 
-n = 2
-grams = ngrams(text, n)
-terms_count = {}
-for gram in grams:
-  term = ''.join(gram)
-  try:
-    terms_count[term] += 1
-  except KeyError:
-    terms_count[term] = 1
+with open(CSV_FILE) as csv_file:
+  csv_reader = csv.DictReader(csv_file, delimiter=',')
+  word_counter = Counter()
 
-results = []
-for key, val in terms_count.items():
-  results.append((val, key))
+  MAX_ROWS = 100
+  i = 1
+  for row in csv_reader:
+    if i > MAX_ROWS:
+      break
+    i = i + 1
+    print('parse article %d %s' % (i, row['url']))
+    content = row['content']
+    for part in split_text(content):
+      grams = ngrams(part, 6)
+      word_counter = word_counter + Counter(grams)
 
-print(sorted(results))
+  results = []
+  for word, count in word_counter.items():
+    results.append((count, ''.join(word)))
+  print(sorted(results))
+
+# def clean_text(string):
+#   for c in STOP_WORDS:
+#     string = string.replace(c, '')
+#   return string
+#
+# text = clean_text(TEXT)
+#
+# n = 2
+# grams = ngrams(text, n)
+# terms_count = {}
+# for gram in grams:
+#   term = ''.join(gram)
+#   try:
+#     terms_count[term] += 1
+#   except KeyError:
+#     terms_count[term] = 1
+#
+# results = []
+# for key, val in terms_count.items():
+#   results.append((val, key))
+#
+# print(sorted(results))
