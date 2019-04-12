@@ -22,17 +22,10 @@ IGNORE_TAGS = {
   'td'
 }
 
-IGNORE_IDS = {
-  'comments'
-}
-
-IGNORE_CLASSES = {
-  'comments'
-}
-
 MIN_P_TAGS = 3
 SPACE_CHARS = {'\n', '\r', '\t', '\v', ' '}
 PARAGRAPH_TAGS = {'article', 'title', 'header', 'h1', 'h2', 'h3', 'h4', 'h5', 'p', 'div'}
+ADS_MIN_LEN = 10
 
 def no_newline(string):
   for c in SPACE_CHARS:
@@ -47,8 +40,9 @@ class NewsSpider(scrapy.Spider):
     ]
     start_urls = [
         # 'https://www.chinatimes.com/opinion/20190409003973-262105?chdtv='
-        'https://www.chinatimes.com/politic/',
+        # 'https://www.chinatimes.com/politic/',
         # 'https://udn.com',
+        'https://fund.udn.com/fund/story/5860/3703015'
     ]
 
     def parse(self, response):
@@ -70,17 +64,18 @@ class NewsSpider(scrapy.Spider):
               yield response.follow(href.get())
 
     def is_article(self, root):
+        # A html DOM is an article if there is single node having more than
+        # N <p></p> tags
         # Recursively traverse DOM tree to detect if it's a news article.
         def _has_article_node(root):
-            # Skip nodes that obviously doesn't include paragraph.
             if root.tag in IGNORE_TAGS:
                 return False
 
-            num_p_tag = 0
+            num_p_tags = 0
             for node in root:
                 if node.tag == 'p':
-                    num_p_tag += 1
-                if num_p_tag >= MIN_P_TAGS:
+                    num_p_tags += 1
+                if num_p_tags >= MIN_P_TAGS:
                     return True
 
             # If root is not paragraph node, iterate through child nodes
@@ -119,14 +114,26 @@ class NewsSpider(scrapy.Spider):
         if node.tag in IGNORE_TAGS:
             return True
 
-        if 'id' in node.attrib and node.attrib['id'] in IGNORE_IDS:
-          print('ignore id %s' % node.attrib['id'])
-          return True
+        # Anchor tag having more than 20 characters are
+        # usually advertisements or link to other article.
+        if self._is_ads_or_link(node):
+            return True
 
-        if 'class' in node.attrib:
-            for class_name in node.attrib['class'].split():
-                if class_name in IGNORE_CLASSES:
-                    print('ignore class %s' % class_name)
-                    return True
 
         return False
+
+    def _is_ads_or_link(self, node):
+        if node.tag != 'a':
+            return False
+
+        text = ''
+        def _inner(node):
+            nonlocal text
+            if node.text:
+                text += node.text
+            for sub_node in node:
+                _inner(sub_node)
+                if sub_node.tail:
+                    text += sub_node.tail
+        _inner(node)
+        return len(text) >= ADS_MIN_LEN

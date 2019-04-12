@@ -7,7 +7,8 @@ from mrjob.protocol import TextProtocol
 from mrjob.protocol import ReprProtocol
 import re
 
-CSV_FILE = 'resource/chinatimes_20190409.csv'
+# CSV_FILE = 'resource/chinatimes_20190409.csv'
+CSV_FILE = 'resource/udn_20190410.csv'
 STOP_WORDS = {'。', '的', '，', '|'}
 
 
