@@ -9,3 +9,11 @@
 __pycache__
 .DS_Store
 *.pyc
+
+# egg
+project.egg-info/
+dbs/
+eggs/
+twistd.pid
+twnews/build/
+twnews/setup.py

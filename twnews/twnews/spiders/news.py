@@ -6,9 +6,9 @@ import logging
 from datetime import datetime
 from scrapy.http import HtmlResponse
 from lxml import etree
-from key import PAGE_URL
-from key import CONTENT_HTML
-from key import FETCH_TIME
+from .keys import PAGE_URL
+from .keys import CONTENT_HTML
+from .keys import FETCH_TIME
 
 IGNORE_TAGS = {
   'audio',

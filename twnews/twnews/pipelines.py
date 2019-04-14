@@ -2,11 +2,10 @@
 #
 # add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-from spider.keys import PAGE_URL
+from .spiders.keys import PAGE_URL
 from scrapy.exceptions import DropItem
 
-
-class UrlDepupePipeline(object):
+class UrlDedupePipeline(object):
 
   def __init__(self):
     self.seen = set()
