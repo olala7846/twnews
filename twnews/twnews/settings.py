@@ -64,9 +64,11 @@ DOWNLOAD_DELAY = 0.1
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'twnews.pipelines.TwnewsPipeline': 300,
-#}
+ITEM_PIPELINES = {
+    'twnews.pipelines.UrlDedupePipeline': 300,
+    # BigtablePipline should run last
+    'twnews.pipelines.BigTablePipeline': 500,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html

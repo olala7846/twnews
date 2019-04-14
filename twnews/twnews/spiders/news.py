@@ -6,6 +6,9 @@ import logging
 from datetime import datetime
 from scrapy.http import HtmlResponse
 from lxml import etree
+from key import PAGE_URL
+from key import CONTENT_HTML
+from key import FETCH_TIME
 
 IGNORE_TAGS = {
   'audio',
@@ -30,11 +33,6 @@ SPACE_CHARS = {'\n', '\r', '\t', '\v', ' '}
 ARTICLE_TAGS = {'p', 'h1', 'h2', 'h3', 'h4', 'h5' }
 PARAGRAPH_TAGS = {'article', 'title', 'header', 'h1', 'h2', 'h3', 'h4', 'h5', 'p', 'div'}
 ADS_MIN_LEN = 10
-
-# output keys
-PAGE_URL = 'page_url'
-CONTENT_HTML = 'content_html'
-FETCH_TIME = 'fetch_time_utc'
 
 
 class NewsSpider(scrapy.Spider):
