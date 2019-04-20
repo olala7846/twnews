@@ -5,34 +5,21 @@
 from .spiders.keys import PAGE_URL
 from scrapy.exceptions import DropItem
 
-class UrlDedupePipeline(object):
 
-  def __init__(self):
-    self.seen = set()
-
-  def process_item(self, item, spider):
-    # TODO(hcchao): send RPC to server, if should drop item
-    # dedupe should be done before fire request.
-    url = item[PAGE_URL]
-    if url in self.seen:
-      raise DropItem("Duplicate url %s" % url)
-    else:
-      self.seen.add(url)
-      return item
-
-
-class BigTablePipeline(object):
+class StoragePipeline(object):
   """ Pipeline that writes data to bigtable """
 
   def open_spider(self, spider):
-    # TODO(hcchao): connection to BT
+    # Connect to Firestore, for deduplication
+    # maybe create an API for this in the future?
     pass
 
   def close_spider(self, spider):
     # TODO(hcchao): close connection to BT
+    # Close all connection
     pass
 
   def process_item(self, item, spider):
-    # TODO(hcchao): write to big table
-
+    # TODO(hcchao): write log to Firestore
+    # TODO(hcchao): write html to Cloud Storage
     return item

@@ -46,9 +46,9 @@ DOWNLOAD_DELAY = 0.1
 
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-#SPIDER_MIDDLEWARES = {
-#    'twnews.middlewares.TwnewsSpiderMiddleware': 543,
-#}
+SPIDER_MIDDLEWARES = {
+    'twnews.middlewares.RequestDedupeMiddleware': 543,
+}
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
@@ -65,9 +65,7 @@ DOWNLOAD_DELAY = 0.1
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'twnews.pipelines.UrlDedupePipeline': 300,
-    # BigtablePipline should run last
-    'twnews.pipelines.BigTablePipeline': 500,
+    'twnews.pipelines.StoragePipeline': 500,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
