@@ -41,9 +41,9 @@ class NewsSpider(scrapy.Spider):
     'udn.com',
   ]
   start_urls = [
-    # 'https://www.chinatimes.com/opinion/20190409003973-262105?chdtv='
+    'https://www.chinatimes.com/opinion/20190409003973-262105?chdtv='
+    # 'https://www.chinatimes.com/politic/',
     # 'https://fund.udn.com/fund/story/5860/3703015'
-    'https://www.chinatimes.com/politic/',
     # 'https://udn.com',
   ]
 
@@ -59,9 +59,10 @@ class NewsSpider(scrapy.Spider):
         CRAWLED_TIME: datetime.utcnow(),
       }
 
-    # Follow links.
-    for href in response.css('a::attr(href)'):
-      yield response.follow(href.get())
+    else:
+      # Follow links.
+      for href in response.css('a::attr(href)'):
+        yield response.follow(href.get())
 
   def is_article(self, response):
     parser = etree.HTMLParser()
