@@ -8,30 +8,29 @@ from scrapy.http import HtmlResponse
 from lxml import etree
 from .keys import PAGE_URL
 from .keys import CONTENT_HTML
-from .keys import FETCH_TIME
+from .keys import CRAWLED_TIME
 
 IGNORE_TAGS = {
   'audio',
   'button',
   'footer',
   'iframe',
+  'li',
   'meta',
   'nav',
   'script',
   'select',
   'style',
-  'video',
-  'ul',
-  'li',
   'table',
-  'tr',
   'td'
+  'tr',
+  'ul',
+  'video',
 }
 
-MIN_ARTICLE_TAGS = 4
-SPACE_CHARS = {'\n', '\r', '\t', '\v', ' '}
+# Number of paragraphs required to be recognized as an article.
+MIN_ARTICLE_TAGS_REQUIRED = 4
 ARTICLE_TAGS = {'p', 'h1', 'h2', 'h3', 'h4', 'h5' }
-PARAGRAPH_TAGS = {'article', 'title', 'header', 'h1', 'h2', 'h3', 'h4', 'h5', 'p', 'div'}
 ADS_MIN_LEN = 10
 
 
@@ -45,7 +44,7 @@ class NewsSpider(scrapy.Spider):
     # 'https://www.chinatimes.com/opinion/20190409003973-262105?chdtv='
     # 'https://fund.udn.com/fund/story/5860/3703015'
     'https://www.chinatimes.com/politic/',
-    'https://udn.com',
+    # 'https://udn.com',
   ]
 
   def parse(self, response):
@@ -57,12 +56,12 @@ class NewsSpider(scrapy.Spider):
       yield {
         PAGE_URL: response.url,
         CONTENT_HTML: response.text,
-        FETCH_TIME: datetime.utcnow(),
+        CRAWLED_TIME: datetime.utcnow(),
       }
-    else:
-      # not article, follow links
-      for href in response.css('a::attr(href)'):
-        yield response.follow(href.get())
+
+    # Follow links.
+    for href in response.css('a::attr(href)'):
+      yield response.follow(href.get())
 
   def is_article(self, response):
     parser = etree.HTMLParser()
@@ -78,7 +77,7 @@ class NewsSpider(scrapy.Spider):
       for sub_node in node:
         if sub_node.tag in ARTICLE_TAGS:
           num_article_nodes += 1
-        if num_article_nodes >= MIN_ARTICLE_TAGS:
+        if num_article_nodes >= MIN_ARTICLE_TAGS_REQUIRED:
           return True
 
       # If root is not paragraph node, iterate through child nodes
@@ -97,18 +96,16 @@ class NewsSpider(scrapy.Spider):
     if node.tag in IGNORE_TAGS:
       return True
 
-    # Anchor tag having more than 20 characters are
+    # Anchor tag having more than ADS_MIN_LEN characters are
     # usually advertisements or link to other article.
     if self._is_ads_or_link(node):
       return True
-
 
     return False
 
   def _is_ads_or_link(self, node):
     if node.tag != 'a':
       return False
-
     text = ''
     def _inner(node):
       nonlocal text

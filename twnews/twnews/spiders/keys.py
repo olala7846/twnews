@@ -4,4 +4,4 @@
 # output keys
 PAGE_URL = 'url'
 CONTENT_HTML = 'content'
-FETCH_TIME = 'fetch_time'
+CRAWLED_TIME = 'crawled_time'
