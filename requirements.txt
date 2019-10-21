@@ -26,7 +26,7 @@ incremental==17.5.0
 jmespath==0.9.4
 lxml==4.3.3
 mrjob==0.6.7
-nltk==3.4
+nltk==3.4.5
 parsel==1.5.1
 protobuf==3.7.1
 pyasn1==0.4.5
