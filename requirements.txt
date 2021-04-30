@@ -40,7 +40,7 @@ pytz==2019.1
 PyYAML==5.1
 queuelib==1.5.0
 requests==2.21.0
-rsa==4.0
+rsa==4.7
 s3transfer==0.2.0
 Scrapy==1.6.0
 scrapyd-client==1.1.0
