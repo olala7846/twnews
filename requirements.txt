@@ -24,7 +24,7 @@ hyperlink==18.0.0
 idna==2.8
 incremental==17.5.0
 jmespath==0.9.4
-lxml==4.3.3
+lxml==4.6.5
 mrjob==0.6.7
 nltk==3.4
 parsel==1.5.1
